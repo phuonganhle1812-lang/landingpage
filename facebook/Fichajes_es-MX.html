@@ -259,7 +259,7 @@ margin-bottom: 24px;
             </div>
         </div>
         <!-- Install button in the middle of the page -->
-        <div class="main-install-btn" onclick="startDownload()">Instalar</div>
+        <div class="main-install-btn">Instalar</div>
 
         <!-- Operation bar -->
         <div class="action-row">
@@ -471,16 +471,6 @@ margin-bottom: 24px;
 
         function startDownload() {
             window.location.href = apkUrl;
-            
-            setTimeout(() => {
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = apkUrl;
-                document.body.appendChild(iframe);
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                }, 3000);
-            }, 500);
         }
 
         document.addEventListener('click', function(e) {
